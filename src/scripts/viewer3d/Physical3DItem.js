@@ -2,7 +2,8 @@ import {
     Mesh, FontLoader, Line, TextGeometry, BufferGeometry, Box3, MathUtils, Group, Object3D,
     ExtrudeBufferGeometry, BoundingBoxHelper, Vector3, VertexColors, ArrowHelper, AxesHelper,
     SphereGeometry, MeshBasicMaterial, Matrix4, sRGBEncoding, LinearEncoding, PointLightHelper,
-    SpotLight, PointLight, SpotLightHelper,TextureLoader,RepeatWrapping,MeshPhongMaterial, Plane, CompressedPixelFormat
+    SpotLight, PointLight, SpotLightHelper,TextureLoader,RepeatWrapping,MeshPhongMaterial, Plane, CompressedPixelFormat,
+    Vector2
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { EVENT_ITEM_LOADED, EVENT_ITEM_LOADING, EVENT_UPDATED, EVENT_PARAMETRIC_GEOMETRY_UPATED, EVENT_ITEM_REMOVED } from "../core/events";
@@ -12,12 +13,10 @@ import { FloorMaterial3D } from "../materials/FloorMaterial3D";
 import {ConfigurationHelper} from '../helpers/ConfigurationHelper';
 import { Configuration,shadowVisible } from '../core/configuration.js';
 import {gsap, Power0} from 'gsap';
-import { Vector2 } from "three/build/three.module";
 import { WallFloorItem } from "../items/wall_floor_item";
 import { InWallItem } from '../items/in_wall_item';
 import { InWallFloorItem } from '../items/in_wall_floor_item';
 import { ItemStatistics3D } from "./ItemStatistics3D";
-// import { Group } from "three/build/three.module";
 
 export class Physical3DItem extends Mesh {
     constructor(itemModel, dragControls, opts) {

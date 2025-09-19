@@ -15,16 +15,19 @@ div {
     padding: 0;
 }
 
-
-/* #bp3d-js-app {
-    overflow: hidden;
-} */
+#bp3d-js-app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 
 #bp3djs-viewer2d,
 #bp3djs-viewer3d {
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 #bp3djs-controls {
@@ -40,13 +43,13 @@ div {
 */
 .qs_color {
     position: absolute;
-    left: 5px; 
-    visibility: hidden; 
-  }
+    left: 5px;
+    visibility: hidden;
+}
 
 .viewer3d-measurement-labels {
     color: #FFF;
     font-family: sans-serif;
     padding: 2px;
-    background: rgba( 0, 0, 0, .6 );
+    background: rgba(0, 0, 0, .6);
 }
