@@ -3,20 +3,31 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { BlueprintComponentProps, Blueprint3DOptions, BlueprintJS } from '../types/blueprint';
 
-// Dynamic imports for client-side only libraries
 const useBlueprintJS = () => {
   const [blueprint3d, setBlueprint3d] = useState<BlueprintJS | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const initializeBlueprint = useCallback(async (options: Blueprint3DOptions) => {
+    if (blueprint3d) return blueprint3d; // Prevent duplicate initialization
+    
     setIsLoading(true);
+    setError(null);
+    
     try {
-      // Dynamic imports to avoid SSR issues
+      // Verify DOM elements exist
+      const viewer2dEl = document.getElementById(options.viewer2d.id);
+      const viewer3dEl = document.getElementById(options.viewer3d.id);
+      
+      if (!viewer2dEl || !viewer3dEl) {
+        throw new Error(`Required DOM elements not found: 2D=${!!viewer2dEl}, 3D=${!!viewer3dEl}`);
+      }
+      
+      // Dynamic imports
       const { BlueprintJS, Configuration, configDimUnit, viewBounds, itemStatistics, dimMeter } = await import('../lib/blueprint');
       
       // Initialize configuration
-      Configuration.setValue(viewBounds, 10000); // In CMS
+      Configuration.setValue(viewBounds, 10000);
       Configuration.setValue(configDimUnit, dimMeter);
       Configuration.setValue(itemStatistics, false);
 
@@ -24,16 +35,17 @@ const useBlueprintJS = () => {
       const bp = new BlueprintJS(options);
       
       setBlueprint3d(bp);
-      setIsLoading(false);
       return bp;
     } catch (err) {
       const error = err as Error;
       setError(new Error(`Blueprint3D initialization failed: ${error.message}`));
+      throw error;
+    } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [blueprint3d]);
 
-  return { blueprint3d, isLoading, error, initializeBlueprint, setError };
+  return { blueprint3d, isLoading, error, initializeBlueprint };
 };
 
 export const BlueprintViewer: React.FC<BlueprintComponentProps> = ({
@@ -46,8 +58,9 @@ export const BlueprintViewer: React.FC<BlueprintComponentProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const viewer2dRef = useRef<HTMLDivElement>(null);
   const viewer3dRef = useRef<HTMLDivElement>(null);
-  const { blueprint3d, isLoading, error, initializeBlueprint, setError } = useBlueprintJS();
+  const { blueprint3d, isLoading, error, initializeBlueprint } = useBlueprintJS();
 
+  // Blueprint3D configuration options
   const options: Blueprint3DOptions = {
     viewer2d: {
       id: 'bp3djs-viewer2d',
@@ -65,12 +78,8 @@ export const BlueprintViewer: React.FC<BlueprintComponentProps> = ({
         dimlinecolor: '#3E0000',
         dimarrowcolor: '#FF0000',
         dimtextcolor: '#000000',
-        pixiAppOptions: {
-          resolution: 1,
-        },
-        pixiViewportOptions: {
-          passiveWheel: false,
-        }
+        pixiAppOptions: { resolution: 1 },
+        pixiViewportOptions: { passiveWheel: false }
       },
     },
     viewer3d: {
@@ -85,29 +94,20 @@ export const BlueprintViewer: React.FC<BlueprintComponentProps> = ({
     resize: true,
   };
 
+  // Initialize Blueprint3D when DOM elements are ready
   useEffect(() => {
-    // Only initialize if we have the container and haven't initialized yet
-    if (containerRef.current && !blueprint3d) {
-      // Use setTimeout to ensure DOM is fully rendered
+    if (!blueprint3d && viewer2dRef.current && viewer3dRef.current) {
       const timer = setTimeout(() => {
-        const viewer2dElement = document.getElementById('bp3djs-viewer2d');
-        const viewer3dElement = document.getElementById('bp3djs-viewer3d');
-        
-        if (viewer2dElement && viewer3dElement) {
-          initializeBlueprint(options).then((bp) => {
-            if (bp && onBlueprintReady) {
-              onBlueprintReady(bp);
-            }
-          });
-        } else {
-          setError(new Error('Blueprint3D DOM elements not found'));
-        }
+        initializeBlueprint(options)
+          .then(bp => onBlueprintReady?.(bp))
+          .catch(err => onError?.(err));
       }, 100);
       
       return () => clearTimeout(timer);
     }
-  }, [blueprint3d, initializeBlueprint, options, onBlueprintReady]);
+  }, [blueprint3d, initializeBlueprint, onBlueprintReady, onError]);
 
+  // Load initial design when Blueprint3D is ready
   useEffect(() => {
     if (blueprint3d && initialDesign) {
       try {
@@ -119,6 +119,7 @@ export const BlueprintViewer: React.FC<BlueprintComponentProps> = ({
     }
   }, [blueprint3d, initialDesign, onLoad, onError]);
 
+  // Forward errors to parent component
   useEffect(() => {
     if (error) {
       onError?.(error);
@@ -136,35 +137,30 @@ export const BlueprintViewer: React.FC<BlueprintComponentProps> = ({
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className={`blueprint-loading ${className}`}>
-        <div className="loading-message">
-          <h3>Loading Blueprint3D...</h3>
-          <div className="spinner"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div 
       ref={containerRef}
       id="bp3d-js-app" 
       className={`blueprint-container ${className}`}
-      style={{ position: 'relative', width: '100%', height: '100%' }}
     >
+      {isLoading && (
+        <div className="blueprint-loading-overlay">
+          <div className="loading-message">
+            <h3>Loading AzPlanner...</h3>
+            <div className="spinner"></div>
+          </div>
+        </div>
+      )}
+      
       <div 
         ref={viewer2dRef}
         id="bp3djs-viewer2d" 
         className="blueprint-viewer-2d"
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
       />
       <div 
         ref={viewer3dRef}
         id="bp3djs-viewer3d" 
         className="blueprint-viewer-3d"
-        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
       />
     </div>
   );
