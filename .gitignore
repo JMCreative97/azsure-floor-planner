@@ -11,5 +11,13 @@ app/*
 3D-Models-Internet/
 TextureSources/*
 
+# Next.js
+.next/
+out/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
 __pycache__
 package-lock.json

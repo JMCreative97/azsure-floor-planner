@@ -1,1 +1,0 @@
-self.__REACT_LOADABLE_MANIFEST="{\"../src/components/BlueprintViewer.tsx -> ../lib/blueprint\":{\"id\":\"../src/components/BlueprintViewer.tsx -> ../lib/blueprint\",\"files\":[\"static/chunks/src_lib_blueprint_ts.js\"]}}"
