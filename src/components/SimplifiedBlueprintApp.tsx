@@ -14,6 +14,9 @@ export default function SimplifiedBlueprintApp() {
   const [showViewer3D, setShowViewer3D] = useState(false);
   const [currentView, setCurrentView] = useState<'Floor Planning' | 'Room Planning'>('Floor Planning');
   
+  // Active tool state
+  const [activeTool, setActiveTool] = useState<'draw' | 'move' | 'transform' | 'delete' | 'more' | null>('draw');
+  
   // 2D Configuration states
   const [snapToGrid, setSnapToGrid] = useState(false);
   const [directionalDrag, setDirectionalDrag] = useState(false);
@@ -58,21 +61,25 @@ export default function SimplifiedBlueprintApp() {
     console.log('Resetting blueprint');
   };
   
-  // Mobile action handlers
+  // Mobile action handlers with toggle functionality
   const handleDraw = () => {
-    console.log('Draw mode');
+    setActiveTool(activeTool === 'draw' ? null : 'draw');
+    console.log('Draw mode', activeTool === 'draw' ? 'disabled' : 'enabled');
   };
   
   const handleMove = () => {
-    console.log('Move mode');
+    setActiveTool(activeTool === 'move' ? null : 'move');
+    console.log('Move mode', activeTool === 'move' ? 'disabled' : 'enabled');
   };
   
   const handleTransform = () => {
-    console.log('Transform mode');
+    setActiveTool(activeTool === 'transform' ? null : 'transform');
+    console.log('Transform mode', activeTool === 'transform' ? 'disabled' : 'enabled');
   };
   
   const handleDelete = () => {
-    console.log('Delete item');
+    setActiveTool(activeTool === 'delete' ? null : 'delete');
+    console.log('Delete mode', activeTool === 'delete' ? 'disabled' : 'enabled');
   };
 
   return (
@@ -89,10 +96,15 @@ export default function SimplifiedBlueprintApp() {
           showViewer3D={showViewer3D}
           onToggle2D={handleToggle2D}
           onToggle3D={handleToggle3D}
+          onUndo={() => console.log('Undo')}
+          onRedo={() => console.log('Redo')}
+          onSettings={() => console.log('Settings')}
           onDraw={handleDraw}
           onMove={handleMove}
           onTransform={handleTransform}
           onDelete={handleDelete}
+          showMore={false}
+          activeTool={activeTool}
         />
       )}
       

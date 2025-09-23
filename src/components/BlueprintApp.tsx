@@ -11,6 +11,8 @@ import {
   PanelFileChooser,
   PanelHTML 
 } from './UIComponents';
+import { MobileInterface } from './mobile';
+import { useMobileDetection } from '../hooks/useMobileDetection';
 import { BlueprintJS, FloorTextures, WallTextures, DoorsData } from '../types/blueprint';
 
 // Import JSON data
@@ -29,6 +31,9 @@ const DOORS_DATA: DoorsData = {
 };
 
 export default function BlueprintApp() {
+  // Mobile detection
+  const isMobile = useMobileDetection();
+  
   // State for Blueprint3D instance
   const [blueprint3d, setBlueprint3d] = useState<BlueprintJS | null>(null);
   const [currentView, setCurrentView] = useState<'Floor Planning' | 'Room Planning'>('Floor Planning');
@@ -41,6 +46,9 @@ export default function BlueprintApp() {
   const [showSelectedRoom, setShowSelectedRoom] = useState(false);
   const [showSelectedWall3D, setShowSelectedWall3D] = useState(false);
   const [showSelectedRoom3D, setShowSelectedRoom3D] = useState(false);
+  
+  // Mobile active tool state
+  const [activeTool, setActiveTool] = useState<'draw' | 'move' | 'transform' | 'delete' | 'more' | null>('move');
   
   // 2D Configuration states
   const [snapToGrid, setSnapToGrid] = useState(false);
@@ -106,20 +114,68 @@ export default function BlueprintApp() {
     }
   }, [blueprint3d]);
 
+  // Simple draw function - just call the blueprint method
   const switchViewer2DToDraw = useCallback(() => {
+    setShowViewer2D(true);
+    setShowViewer3D(false);
     blueprint3d?.setViewer2DModeToDraw();
+    setActiveTool('draw');
   }, [blueprint3d]);
 
   const switchViewer2DToMove = useCallback(() => {
+    setShowViewer2D(true);
+    setShowViewer3D(false);
     blueprint3d?.setViewer2DModeToMove();
+    setActiveTool('move');
   }, [blueprint3d]);
 
   const switchViewer2DToTransform = useCallback(() => {
+    setShowViewer2D(true);
+    setShowViewer3D(false);
     blueprint3d?.switchViewer2DToTransform();
+    setActiveTool('transform');
   }, [blueprint3d]);
 
   const deleteCurrentItem = useCallback(() => {
-    blueprint3d?.floorplanningHelper?.deleteCurrentItem();
+    if (activeTool === 'delete') {
+      // Deactivating delete mode - only update UI state
+      setActiveTool(null);
+    } else {
+      // Activating delete mode - this is different, it's an action not a mode
+      // For delete, we might want to just perform the action and not stay active
+      blueprint3d?.floorplanningHelper?.deleteCurrentItem();
+      // Don't set delete as persistent active state since it's an action
+      setActiveTool(null);
+    }
+  }, [blueprint3d, activeTool]);
+
+  // Zoom functions for mobile
+  const zoomIn = useCallback(() => {
+    blueprint3d?.floorplanner?.zoomIn?.();
+  }, [blueprint3d]);
+
+  const zoomOut = useCallback(() => {
+    blueprint3d?.floorplanner?.zoomOut?.();
+  }, [blueprint3d]);
+
+  const fitToView = useCallback(() => {
+    blueprint3d?.floorplanner?.fitToView?.();
+  }, [blueprint3d]);
+
+  // Set initial zoom to be less zoomed in
+  const setInitialZoom = useCallback(() => {
+    if (blueprint3d?.floorplanner?.viewer2d?.__floorplanContainer) {
+      // Set zoom to 50% of current to show more of the plan
+      const container = blueprint3d.floorplanner.viewer2d.__floorplanContainer;
+      const currentZoom = container.scale.x;
+      const newZoom = currentZoom * 0.5; // 50% zoom out
+      container.scale.x = container.scale.y = newZoom;
+      // Also apply to temp wall holder if it exists
+      if (blueprint3d.floorplanner.viewer2d.__tempWallHolder) {
+        blueprint3d.floorplanner.viewer2d.__tempWallHolder.scale.x = newZoom;
+        blueprint3d.floorplanner.viewer2d.__tempWallHolder.scale.y = newZoom;
+      }
+    }
   }, [blueprint3d]);
 
   const resetBlueprint = useCallback(() => {
@@ -222,6 +278,8 @@ export default function BlueprintApp() {
     // Load default design
     const default_room = JSON.stringify(default_room_json);
     bp.model.loadSerialized(default_room);
+    // Activate move mode by default
+    bp?.setViewer2DModeToMove?.();
   }, []);
 
   return (
@@ -234,7 +292,35 @@ export default function BlueprintApp() {
         className="w-full h-full"
       />
       
-      {/* Main UI Panel */}
+      {/* Mobile Interface */}
+      {isMobile && (
+        <MobileInterface
+          showViewer2D={showViewer2D}
+          showViewer3D={showViewer3D}
+          onToggle2D={() => {
+            setShowViewer2D(true);
+            setShowViewer3D(false);
+          }}
+          onToggle3D={() => {
+            setShowViewer2D(false);
+            setShowViewer3D(true);
+          }}
+          onDraw={switchViewer2DToDraw}
+          onMove={switchViewer2DToMove}
+          onTransform={switchViewer2DToTransform}
+          onDelete={deleteCurrentItem}
+          onAdd={() => console.log('Add elements - placeholder for future functionality')}
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onFitToView={fitToView}
+          activeTool={activeTool}
+        />
+      )}
+      
+      {/* Desktop Panels - Hidden on Mobile */}
+      {!isMobile && (
+        <>
+          {/* Main UI Panel */}
       <UIPanel
         title="BlueprintJS"
         visible={true}
@@ -498,6 +584,8 @@ export default function BlueprintApp() {
           </>
         )}
       </UIPanel>
+        </>
+      )}
     </div>
   );
 }

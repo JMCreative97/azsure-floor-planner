@@ -1,4 +1,5 @@
 import React from 'react';
+import { Undo2, Redo2, Settings, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
 interface MobileTopBarProps {
   showViewer2D: boolean;
@@ -8,6 +9,9 @@ interface MobileTopBarProps {
   onUndo?: () => void;
   onRedo?: () => void;
   onSettings?: () => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onFitToView?: () => void;
 }
 
 export const MobileTopBar: React.FC<MobileTopBarProps> = ({
@@ -17,7 +21,10 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
   onToggle3D,
   onUndo,
   onRedo,
-  onSettings
+  onSettings,
+  onZoomIn,
+  onZoomOut,
+  onFitToView
 }) => {
   return (
     <div style={{
@@ -45,7 +52,7 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
       </div>
 
       {/* 2D/3D Toggle */}
-      <div style={{
+      {/* <div style={{
         display: 'flex',
         background: '#f1f5f9',
         borderRadius: '6px',
@@ -83,7 +90,68 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
         >
           3D
         </button>
-      </div>
+      </div> */}
+
+      {/* Zoom Controls - only show in 2D mode */}
+      {showViewer2D && (
+        <div style={{
+          display: 'flex',
+          gap: '4px',
+          alignItems: 'center'
+        }}>
+          <button
+            onClick={onZoomOut}
+            style={{
+              padding: '4px',
+              border: 'none',
+              borderRadius: '4px',
+              background: 'transparent',
+              color: '#6b7280',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Zoom Out"
+          >
+            <ZoomOut size={16} />
+          </button>
+          <button
+            onClick={onFitToView}
+            style={{
+              padding: '4px',
+              border: 'none',
+              borderRadius: '4px',
+              background: 'transparent',
+              color: '#6b7280',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Fit to View"
+          >
+            <Maximize2 size={16} />
+          </button>
+          <button
+            onClick={onZoomIn}
+            style={{
+              padding: '4px',
+              border: 'none',
+              borderRadius: '4px',
+              background: 'transparent',
+              color: '#6b7280',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Zoom In"
+          >
+            <ZoomIn size={16} />
+          </button>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div style={{
@@ -100,11 +168,13 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
             background: 'transparent',
             color: '#6b7280',
             cursor: 'pointer',
-            fontSize: '16px'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
           title="Undo"
         >
-          ↶
+          <Undo2 size={18} />
         </button>
         <button
           onClick={onRedo}
@@ -115,11 +185,13 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
             background: 'transparent',
             color: '#6b7280',
             cursor: 'pointer',
-            fontSize: '16px'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
           title="Redo"
         >
-          ↷
+          <Redo2 size={18} />
         </button>
         <button
           onClick={onSettings}
@@ -130,11 +202,13 @@ export const MobileTopBar: React.FC<MobileTopBarProps> = ({
             background: 'transparent',
             color: '#6b7280',
             cursor: 'pointer',
-            fontSize: '16px'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
           title="Settings"
         >
-          ⚙️
+          <Settings size={18} />
         </button>
       </div>
     </div>

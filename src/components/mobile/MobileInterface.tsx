@@ -15,13 +15,21 @@ interface MobileInterfaceProps {
   onUndo?: () => void;
   onRedo?: () => void;
   onSettings?: () => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onFitToView?: () => void;
   
   // Bottom bar actions
   onDraw: () => void;
   onMove: () => void;
   onTransform: () => void;
   onDelete: () => void;
+  onAdd?: () => void; // Add button handler
+  showMore?: boolean;
   onMore?: () => void;
+  
+  // Active tool state
+  activeTool?: 'draw' | 'move' | 'transform' | 'delete' | 'add' | 'more' | null;
 }
 
 export const MobileInterface: React.FC<MobileInterfaceProps> = ({
@@ -32,11 +40,17 @@ export const MobileInterface: React.FC<MobileInterfaceProps> = ({
   onUndo,
   onRedo,
   onSettings,
+  onZoomIn,
+  onZoomOut,
+  onFitToView,
   onDraw,
   onMove,
   onTransform,
   onDelete,
-  onMore
+  onAdd,
+  showMore = false,
+  onMore,
+  activeTool
 }) => {
   return (
     <>
@@ -48,6 +62,9 @@ export const MobileInterface: React.FC<MobileInterfaceProps> = ({
         onUndo={onUndo}
         onRedo={onRedo}
         onSettings={onSettings}
+        onZoomIn={onZoomIn}
+        onZoomOut={onZoomOut}
+        onFitToView={onFitToView}
       />
       
       <MobileBottomBar
@@ -55,7 +72,10 @@ export const MobileInterface: React.FC<MobileInterfaceProps> = ({
         onMove={onMove}
         onTransform={onTransform}
         onDelete={onDelete}
+        onAdd={onAdd}
+        showMore={showMore}
         onMore={onMore}
+        activeTool={activeTool}
       />
     </>
   );

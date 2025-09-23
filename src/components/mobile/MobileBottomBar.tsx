@@ -1,11 +1,17 @@
 import React from 'react';
+import { PenTool, Move, RotateCw, Trash2, MoreHorizontal, Plus } from 'lucide-react';
 
 interface MobileBottomBarProps {
   onDraw: () => void;
   onMove: () => void;
   onTransform: () => void;
   onDelete: () => void;
+  onAdd?: () => void; // Add button handler
+  showMore?: boolean;
   onMore?: () => void;
+  
+  // Active states
+  activeTool?: 'draw' | 'move' | 'transform' | 'delete' | 'add' | 'more' | null;
 }
 
 export const MobileBottomBar: React.FC<MobileBottomBarProps> = ({
@@ -13,8 +19,29 @@ export const MobileBottomBar: React.FC<MobileBottomBarProps> = ({
   onMove,
   onTransform,
   onDelete,
-  onMore
+  onAdd,
+  showMore = false,
+  onMore,
+  activeTool
 }) => {
+  const getButtonStyle = (isActive: boolean, isDelete: boolean = false) => ({
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    padding: '4px 8px',
+    border: 'none',
+    borderRadius: '6px',
+    background: isActive ? '#3b82f6' : 'transparent',
+    color: isActive ? '#ffffff' : (isDelete ? '#dc2626' : '#374151'),
+    cursor: 'pointer',
+    minWidth: '56px',
+    fontSize: '12px',
+    fontWeight: '500',
+    gap: '2px',
+    transition: 'all 0.2s ease',
+    transform: isActive ? 'scale(1.05)' : 'scale(1)',
+    boxShadow: isActive ? '0 2px 4px rgba(59, 130, 246, 0.3)' : 'none'
+  });
   return (
     <div style={{
       position: 'fixed',
@@ -32,109 +59,58 @@ export const MobileBottomBar: React.FC<MobileBottomBarProps> = ({
       boxShadow: '0 -1px 3px rgba(0,0,0,0.1)'
     }}>
       <button
-        onClick={onDraw}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '4px 8px',
-          border: 'none',
-          borderRadius: '6px',
-          background: 'transparent',
-          color: '#374151',
-          cursor: 'pointer',
-          minWidth: '56px',
-          fontSize: '12px',
-          fontWeight: '500'
-        }}
+        onClick={onAdd || (() => console.log('Add elements placeholder'))}
+        style={getButtonStyle(activeTool === 'add')}
       >
-        <span style={{ fontSize: '18px', marginBottom: '2px' }}>✏️</span>
+        <Plus size={18} />
+        <span>Add</span>
+      </button>
+
+      <button
+        onClick={onDraw}
+        style={getButtonStyle(activeTool === 'draw')}
+      >
+        <PenTool size={18} />
         <span>Draw</span>
       </button>
 
       <button
         onClick={onMove}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '4px 8px',
-          border: 'none',
-          borderRadius: '6px',
-          background: 'transparent',
-          color: '#374151',
-          cursor: 'pointer',
-          minWidth: '56px',
-          fontSize: '12px',
-          fontWeight: '500'
-        }}
+        style={getButtonStyle(activeTool === 'move')}
       >
-        <span style={{ fontSize: '18px', marginBottom: '2px' }}>👋</span>
+        <Move size={18} />
         <span>Move</span>
       </button>
 
       <button
         onClick={onTransform}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '4px 8px',
-          border: 'none',
-          borderRadius: '6px',
-          background: 'transparent',
-          color: '#374151',
-          cursor: 'pointer',
-          minWidth: '56px',
-          fontSize: '12px',
-          fontWeight: '500'
-        }}
+        style={getButtonStyle(activeTool === 'transform')}
       >
-        <span style={{ fontSize: '18px', marginBottom: '2px' }}>🔄</span>
+        <RotateCw size={18} />
         <span>Transform</span>
       </button>
 
       <button
         onClick={onDelete}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '4px 8px',
-          border: 'none',
-          borderRadius: '6px',
-          background: 'transparent',
-          color: '#dc2626',
-          cursor: 'pointer',
-          minWidth: '56px',
-          fontSize: '12px',
-          fontWeight: '500'
-        }}
+        style={getButtonStyle(activeTool === 'delete', true)}
       >
-        <span style={{ fontSize: '18px', marginBottom: '2px' }}>🗑️</span>
+        <Trash2 size={18} />
         <span>Delete</span>
       </button>
 
-      <button
-        onClick={onMore}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '4px 8px',
-          border: 'none',
-          borderRadius: '6px',
-          background: 'transparent',
-          color: '#374151',
-          cursor: 'pointer',
-          minWidth: '56px',
-          fontSize: '12px',
-          fontWeight: '500'
-        }}
-      >
-        <span style={{ fontSize: '18px', marginBottom: '2px' }}>⋯</span>
-        <span>More</span>
-      </button>
+      {showMore && (
+        <button
+          onClick={onMore}
+          style={{
+            ...getButtonStyle(activeTool === 'more'),
+            opacity: onMore ? 1 : 0.5
+          }}
+          disabled={!onMore}
+        >
+          <MoreHorizontal size={18} />
+          <span>More</span>
+        </button>
+      )}
     </div>
   );
 };

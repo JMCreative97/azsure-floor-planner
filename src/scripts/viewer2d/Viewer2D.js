@@ -65,18 +65,20 @@ export class Viewer2D extends Application {
         const pixiDefalultAppOpts = {
             width: 512, 
             height: 512,
-            resolution: window.devicePixelRatio || 2,
+            resolution: window.devicePixelRatio || 1,
             antialias: true,
             backgroundAlpha: true,
+            autoDensity: true, // This helps with proper DPI scaling
+            powerPreference: 'high-performance', // Better rendering quality
         };
         // super({width: 512, height: 512});
         super(Object.assign(pixiDefalultAppOpts, pixiAppOptions));
         this.__eventDispatcher = new EventDispatcher();
 
         let opts = { 
-            'corner-radius': 20, 
-            'boundary-point-radius': 5.0,
-            'boundary-line-thickness': 1.0,
+            'corner-radius': window.innerWidth <= 768 ? 15 : 20, 
+            'boundary-point-radius': window.innerWidth <= 768 ? 3.0 : 5.0,
+            'boundary-line-thickness': window.innerWidth <= 768 ? 0.8 : 1.0,
             'boundary-point-color':'#D3D3D3',
             'boundary-line-color':'#F3F3F3',
             pannable: true, 
@@ -166,6 +168,9 @@ export class Viewer2D extends Application {
         origin.drawCircle(0, 0, 5);
 
         this.__floorplanContainer.position.set(window.innerWidth * 0.5, window.innerHeight * 0.5);
+        
+        // Set better initial zoom for mobile - much more zoomed out
+        this.__floorplanContainer.scale.set(0.3, 0.3);
 
         this.renderer.backgroundColor = 0xFFFFFF;
         this.renderer.autoResize = true;
@@ -184,6 +189,9 @@ export class Viewer2D extends Application {
 
         this.stage.addChild(this.__floorplanContainer);
         this.stage.addChild(this.__tempWallHolder);
+        
+        // Set temp wall holder to match initial zoom
+        this.__tempWallHolder.scale.set(0.3, 0.3);
 
         this.__canvasHolder.appendChild(this.view);
 
@@ -612,6 +620,15 @@ export class Viewer2D extends Application {
         this.renderer.view.style.width = w + 'px';
         this.renderer.view.style.height = h + 'px';
         this.renderer.view.style.display = 'block';
+        
+        // Add mobile-specific canvas styling for better text/line rendering
+        this.renderer.view.style.imageRendering = 'auto'; // Better for text than crisp-edges
+        this.renderer.view.style.webkitFontSmoothing = 'antialiased';
+        this.renderer.view.style.fontSmooth = 'always';
+        this.renderer.view.style.textRendering = 'optimizeLegibility';
+        this.renderer.view.style.webkitTransform = 'translateZ(0)';
+        this.renderer.view.style.transform = 'translateZ(0)';
+        
         this.__floorplanContainer.resize(w, h, this.__worldWidth, this.__worldHeight);
 
 
@@ -639,5 +656,45 @@ export class Viewer2D extends Application {
         this.__floorplan.removeEventListener(EVENT_LOADED, this.__redrawFloorplanEvent);
         window.removeEventListener('resize', this.__windowResizeEvent);
         window.removeEventListener('orientationchange', this.__windowResizeEvent);
+    }
+
+    // Public zoom methods for mobile interface
+    zoomIn(factor = 1.2) {
+        if (this.__floorplanContainer) {
+            const currentZoom = this.__floorplanContainer.scale.x;
+            const newZoom = Math.min(currentZoom * factor, 60); // Use same max as __zoomed
+            this.__floorplanContainer.scale.x = this.__floorplanContainer.scale.y = newZoom;
+            this.__tempWallHolder.scale.x = this.__tempWallHolder.scale.y = newZoom;
+            this.__grid2d.gridScale = newZoom; // Update grid scale like __zoomed does
+        }
+    }
+
+    zoomOut(factor = 0.8) {
+        if (this.__floorplanContainer) {
+            const currentZoom = this.__floorplanContainer.scale.x;
+            // Calculate maxZoomOut like in __zoomed method
+            const bounds = Dimensioning.cmToPixel(Configuration.getNumericValue(viewBounds));
+            const maxZoomOut = Math.max(window.innerWidth, window.innerHeight) / bounds;
+            const newZoom = Math.max(currentZoom * factor, maxZoomOut);
+            this.__floorplanContainer.scale.x = this.__floorplanContainer.scale.y = newZoom;
+            this.__tempWallHolder.scale.x = this.__tempWallHolder.scale.y = newZoom;
+            this.__grid2d.gridScale = newZoom; // Update grid scale like __zoomed does
+        }
+    }
+
+    fitToView() {
+        if (this.__floorplanContainer) {
+            // Calculate proper fit zoom based on content and screen size
+            const bounds = Dimensioning.cmToPixel(Configuration.getNumericValue(viewBounds));
+            const maxZoomOut = Math.max(window.innerWidth, window.innerHeight) / bounds;
+            // Set to a comfortable overview zoom - slightly above minimum
+            const fitZoom = Math.max(maxZoomOut * 1.2, 0.3);
+            
+            this.__floorplanContainer.scale.x = this.__floorplanContainer.scale.y = fitZoom;
+            this.__tempWallHolder.scale.x = this.__tempWallHolder.scale.y = fitZoom;
+            this.__grid2d.gridScale = fitZoom; // Update grid scale
+            // Center the view around actual floorplan content
+            this.__center();
+        }
     }
 }
