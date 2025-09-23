@@ -159,7 +159,7 @@ export_path_root = os.path.abspath('../build/');
 # But this is a huge discussion, should we keep it standard to GLTF or support multiple formats?
 export_path_gltf_json = os.path.abspath('../build/js/items_%s.js'%(in_format));
 
-# Path where all the meshes will be exported inside the build folder. This is where Blueprint-js will load the meshs(furnitures) from
+# Path where all the meshes will be exported inside the build folder. This is where AzPlan will load the meshs(furnitures) from
 export_dir_gltf = createDir(os.path.abspath('../build/models/%s/'%(in_format)));
 # Path where all the thumbnails will be exported inside the build folder. This is where the inventory page displays the thumbnails of each furniture
 export_dir_thumbnails = createDir(os.path.abspath('../build/models/thumbnails_new/'));

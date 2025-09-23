@@ -41,7 +41,7 @@ class BlueprintJSImporterOperator(bpy.types.Operator):
         #     bpy.data.collections.remove(collection, do_unlink=True, do_id_user=True, do_ui_user=True);
         # collection = bpy.data.collections.new('blueprint-js');
 
-        collection = newCollection('blueprint-js');
+        collection = newCollection('azure-floor-planner');
         context.scene.collection.children.link(collection);
         # collection.name = 'blueprint-js';
 

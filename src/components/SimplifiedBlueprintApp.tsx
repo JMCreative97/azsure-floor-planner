@@ -1,11 +1,9 @@
-// Example of how to use the separated components
 import React, { useState, useEffect } from 'react';
 import { BlueprintViewer } from './BlueprintViewer';
 import { MobileInterface } from './mobile';
 import { MainPanel, Viewer2DPanel } from './panels';
 import { useMobileDetection } from '../hooks/useMobileDetection';
 
-// This is a simplified example showing how to structure BlueprintApp with separated components
 export default function SimplifiedBlueprintApp() {
   const isMobile = useMobileDetection();
   

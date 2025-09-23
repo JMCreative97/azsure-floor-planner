@@ -1,8 +1,8 @@
 import os, sys, json;
 import pathlib
 
-read_write_floors_data = [os.path.abspath('./textures/Floor'), os.path.abspath('/home/ashok/Workspace/blueprint-js/src/floor_textures.json')]
-read_write_walls_data = [os.path.abspath('./textures/Wall'), os.path.abspath('/home/ashok/Workspace/blueprint-js/src/wall_textures.json')]
+read_write_floors_data = [os.path.abspath('./textures/Floor'), os.path.abspath('../../src/floor_textures.json')]
+read_write_walls_data = [os.path.abspath('./textures/Wall'), os.path.abspath('../../src/wall_textures.json')]
 
 USE_RELATIVE_PATH_FROM  = os.getcwd()
 INPUT_TEXTURES_DIRECTORY = read_write_walls_data[0]

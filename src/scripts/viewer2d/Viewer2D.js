@@ -68,8 +68,8 @@ export class Viewer2D extends Application {
             resolution: window.devicePixelRatio || 1,
             antialias: true,
             backgroundAlpha: true,
-            autoDensity: true, // This helps with proper DPI scaling
-            powerPreference: 'high-performance', // Better rendering quality
+            autoDensity: true, 
+            powerPreference: 'high-performance', 
         };
         // super({width: 512, height: 512});
         super(Object.assign(pixiDefalultAppOpts, pixiAppOptions));
@@ -217,12 +217,11 @@ export class Viewer2D extends Application {
         this.__floorplanContainer.on('mouseup', this.__drawModeMouseUpEvent);
         this.__floorplanContainer.on('mousemove', this.__drawModeMouseMoveEvent);
 
-        //User touches the screen then emulate the Mouseup event creating a corner
-        this.__floorplanContainer.on('touchstart', this.__drawModeMouseUpEvent);
-        //User then touch moves and lifts the finger away from the screen. Now create the next corner
+        // For mobile: tap to create corners (not drag)
+        // touchend is when the user lifts their finger - this is when we want to create a corner
         this.__floorplanContainer.on('touchend', this.__drawModeMouseUpEvent);
 
-        //Use touches and drags across the screen then emulate drawing the temporary wall
+        // touchmove updates the temporary wall preview
         this.__floorplanContainer.on('touchmove', this.__drawModeMouseMoveEvent);
 
         // this.__floorplan.addEventListener(EVENT_UPDATED, (evt) => scope.__redrawFloorplan(evt));
@@ -334,8 +333,9 @@ export class Viewer2D extends Application {
     }
 
     __drawModeMouseDown(evt) {
+        // Don't handle mousedown for touch devices - they use touchend instead
         if (IS_TOUCH_DEVICE) {
-            this.__drawModeMouseUp(evt);
+            return;
         }
     }
 
@@ -381,12 +381,8 @@ export class Viewer2D extends Application {
                 this.__tempWall.visible = true;
             }
 
-            if (IS_TOUCH_DEVICE && corner && this.__lastNode !== null) {
-                this.__tempWall.visible = false;
-                this.__lastNode = null;
-            } else {
-                this.__lastNode = corner;
-            }
+            // Set the last node to the newly created corner for the next wall segment
+            this.__lastNode = corner;
         }
     }
 

@@ -1,7 +1,7 @@
 {
-    "name": "blueprint3d-js",
+    "name": "azsure-azplan",
     "version": "3.0.1",
-    "description": "This is the core framework of Blueprint-js for creating floorplans in 2d and 3d",
+    "description": "Tool for creating floorplans in 2d and 3d",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -16,15 +16,8 @@
         "frameworkonly-production": "parcel build src/scripts/blueprint.js  --global BP3DJS --no-source-maps --dist-dir bin/ --target browser --out-file bp3djs.js  --no-content-hash",
         "docs": "esdoc"
     },
-    "repository": {
-        "type": "git",
-        "url": "git+ssh://git@github.com/aalavandhaann/blueprint-js.git"
-    },
-    "author": "#0K Srinivasan <ashok.srinivasan2002@gmail.com> (@aalavandhaann)",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/aalavandhaann/blueprint-js/issues"
-    },
+    "author": "azsure",
+    "license": "MIT",
     "dependencies": {
         "@thi.ng/geom-hull": "0.0.27",
         "alpha-shape": "^1.0.0",

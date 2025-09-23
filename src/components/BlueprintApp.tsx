@@ -116,23 +116,65 @@ export default function BlueprintApp() {
 
   // Simple draw function - just call the blueprint method
   const switchViewer2DToDraw = useCallback(() => {
+    if (!blueprint3d) {
+      console.error('Blueprint3d not initialized yet!');
+      return;
+    }
+
+    // Force 2D view to be visible
+    const viewer2d = document.getElementById('bp3djs-viewer2d');
+    const viewer3d = document.getElementById('bp3djs-viewer3d');
+
+    if (viewer2d) viewer2d.style.visibility = 'visible';
+    if (viewer3d) viewer3d.style.visibility = 'hidden';
+
     setShowViewer2D(true);
     setShowViewer3D(false);
-    blueprint3d?.setViewer2DModeToDraw();
+
+    // Activate draw mode
+    blueprint3d.setViewer2DModeToDraw();
     setActiveTool('draw');
   }, [blueprint3d]);
 
   const switchViewer2DToMove = useCallback(() => {
+    if (!blueprint3d) {
+      console.error('Blueprint3d not initialized yet!');
+      return;
+    }
+
+    // Force 2D view to be visible
+    const viewer2d = document.getElementById('bp3djs-viewer2d');
+    const viewer3d = document.getElementById('bp3djs-viewer3d');
+
+    if (viewer2d) viewer2d.style.visibility = 'visible';
+    if (viewer3d) viewer3d.style.visibility = 'hidden';
+
     setShowViewer2D(true);
     setShowViewer3D(false);
-    blueprint3d?.setViewer2DModeToMove();
+
+    // Activate move mode
+    blueprint3d.setViewer2DModeToMove();
     setActiveTool('move');
   }, [blueprint3d]);
 
   const switchViewer2DToTransform = useCallback(() => {
+    if (!blueprint3d) {
+      console.error('Blueprint3d not initialized yet!');
+      return;
+    }
+
+    // Force 2D view to be visible
+    const viewer2d = document.getElementById('bp3djs-viewer2d');
+    const viewer3d = document.getElementById('bp3djs-viewer3d');
+
+    if (viewer2d) viewer2d.style.visibility = 'visible';
+    if (viewer3d) viewer3d.style.visibility = 'hidden';
+
     setShowViewer2D(true);
     setShowViewer3D(false);
-    blueprint3d?.switchViewer2DToTransform();
+
+    // Activate transform mode
+    blueprint3d.switchViewer2DToTransform();
     setActiveTool('transform');
   }, [blueprint3d]);
 
@@ -278,8 +320,13 @@ export default function BlueprintApp() {
     // Load default design
     const default_room = JSON.stringify(default_room_json);
     bp.model.loadSerialized(default_room);
-    // Activate move mode by default
-    bp?.setViewer2DModeToMove?.();
+    // Wait a bit for the model to load, then activate move mode
+    setTimeout(() => {
+      if (bp && bp.setViewer2DModeToMove) {
+        bp.setViewer2DModeToMove();
+        setActiveTool('move');
+      }
+    }, 100);
   }, []);
 
   return (
@@ -322,7 +369,7 @@ export default function BlueprintApp() {
         <>
           {/* Main UI Panel */}
       <UIPanel
-        title="BlueprintJS"
+        title="AzPlanner"
         visible={true}
         width={200}
         height={450}
@@ -348,7 +395,7 @@ export default function BlueprintApp() {
         title="Viewer 2D"
         visible={showViewer2D}
         width={200}
-        height={460}
+        height={600}
         position={{ x: 20, y: 460 }}
       >
         <PanelButton label="Draw Mode" onClick={switchViewer2DToDraw} />
